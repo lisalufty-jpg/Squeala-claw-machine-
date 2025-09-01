@@ -1,0 +1,520 @@
+
+:root {
+  --background-color: #1a1a2e;
+  --primary-color: #e94560;
+  --secondary-color: #0f3460;
+  --accent-color: #fca311;
+  --text-color: #ffffff;
+  --font-family: 'Press Start 2P', cursive;
+  --health-bar-color: #4caf50;
+  --health-bar-bg: #555;
+  --mist-bottle-color: #8a2be2;
+  --mist-liquid-color: deeppink;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  background-color: var(--background-color);
+  color: var(--text-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  overflow: hidden;
+  user-select: none;
+}
+
+#root {
+  width: 100%;
+  max-width: 450px;
+  height: 100vh;
+  max-height: 800px;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-container {
+  width: 100%;
+  height: 100%;
+  background-color: var(--secondary-color);
+  border: 8px solid var(--accent-color);
+  border-radius: 20px;
+  box-shadow: 0 0 20px var(--accent-color);
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.header {
+  text-align: center;
+  padding-bottom: 1rem;
+  border-bottom: 4px solid var(--accent-color);
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.header h1 {
+  font-size: 1.5rem;
+  color: var(--primary-color);
+  margin: 0;
+  text-shadow: 2px 2px #000;
+}
+
+.sound-controls {
+    position: absolute;
+    top: -5px;
+    right: 0;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.sound-toggle {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+}
+
+.sound-toggle.music.muted {
+    opacity: 0.4;
+    text-decoration: line-through;
+    text-decoration-color: var(--primary-color);
+    text-decoration-thickness: 3px;
+}
+
+.info-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  font-size: 0.8rem;
+}
+
+.info-bar .timer {
+    color: var(--accent-color);
+    font-weight: bold;
+}
+
+.info-bar button {
+  font-family: var(--font-family);
+  background-color: var(--primary-color);
+  color: var(--text-color);
+  border: 2px solid var(--text-color);
+  border-radius: 8px;
+  padding: 0.5rem;
+  cursor: pointer;
+  font-size: 0.6rem;
+}
+
+.nav-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.game-wrapper {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.game-area {
+  flex-grow: 1;
+  position: relative;
+  background: linear-gradient(to bottom, #16213e, #0f3460 70%);
+  border: 4px solid #fff;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+/* Timed Game Overlay */
+.game-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.7);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+.game-overlay h2 { font-size: 1.8rem; color: var(--primary-color); text-shadow: 3px 3px #000; margin: 1rem 0; }
+.game-overlay .final-score { font-size: 1.2rem; color: var(--accent-color); margin: 0.5rem 0 1.5rem; }
+
+.start-btn {
+    font-family: var(--font-family); font-size: 1.2rem; padding: 1rem 2rem;
+    border-radius: 10px; border: 3px solid var(--text-color);
+    background-color: #4caf50; color: var(--text-color); cursor: pointer;
+    box-shadow: 0 5px #2a6a2c;
+}
+.start-btn:active { transform: translateY(2px); box-shadow: 0 3px #2a6a2c; }
+
+
+/* Claw */
+@keyframes claw-damage-flash {
+    0%, 100% { box-shadow: 0 0 5px #ffcc00; }
+    50% { box-shadow: 0 0 20px 10px red; }
+}
+.claw {
+  position: absolute; width: 50px; height: 200px;
+  transform: translateX(-50%);
+  transition: left 0.1s linear, top 0.1s linear; z-index: 10;
+}
+.claw.damaged .claw-base { animation: claw-damage-flash 0.3s ease-in-out; }
+.claw.auto-move { transition: top 1.5s ease-in-out; }
+.claw-arm { width: 8px; height: calc(100% - 30px); background-color: #c0c0c0; margin: 0 auto; position: relative; }
+.claw-base {
+  width: 50px; height: 30px; background-color: #ffcc00; border: 2px solid #333;
+  border-radius: 5px; position: absolute; bottom: 0;
+}
+.pincer {
+  position: absolute; bottom: 5px; width: 10px; height: 40px; background-color: #c0c0c0;
+  border: 2px solid #333; border-radius: 5px; transition: transform 0.3s ease-in-out;
+  transform-origin: top center;
+}
+.pincer.left { left: 5px; transform: rotate(30deg); }
+.pincer.left.closed { transform: rotate(10deg); }
+.pincer.right { right: 5px; transform: rotate(-30deg); }
+.pincer.right.closed { transform: rotate(-10deg); }
+
+/* Biting Squeala Animation */
+@keyframes bite-shake {
+  0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+  25% { transform: translate(-55%, -50%) rotate(-5deg); }
+  75% { transform: translate(-45%, -50%) rotate(5deg); }
+}
+.biting-squeala-wrapper {
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    transform: translate(-50%, -50%);
+    animation: bite-shake 0.3s infinite;
+    z-index: -1;
+}
+.biting-squeala-wrapper .squeala {
+    position: static !important;
+    transform: scale(0.9);
+}
+
+/* Squeala */
+.squeala { position: absolute; width: 40px; height: 40px; border: 2px solid black; border-radius: 4px; }
+.squeala .eye-container { position: absolute; width: 100%; top: 8px; display: flex; justify-content: space-around; padding: 0 5px; box-sizing: border-box; }
+.squeala .eye { width: 12px; height: 12px; background: black; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
+.squeala .pupil { width: 4px; height: 4px; background: white; border-radius: 50%; }
+.squeala .mouth { position: absolute; bottom: 7px; left: 50%; transform: translateX(-50%); width: 20px; height: 10px; border: 3px solid black; border-color: transparent transparent black transparent; border-radius: 50%; }
+.squeala .ear { position: absolute; width: 12px; height: 20px; background: inherit; border: 2px solid black; border-radius: 4px 4px 0 0; top: -15px; }
+.squeala .ear.left { left: 0px; } .squeala .ear.right { right: 0px; }
+.squeala .wing { position: absolute; width: 15px; height: 25px; border: 2px solid black; border-radius: 50% 50% 0 50%; top: 5px; background: rgba(255, 255, 255, 0.7); }
+.squeala .wing.left { left: -12px; transform: rotate(-20deg); }
+.squeala .wing.right { right: -12px; transform: rotate(20deg); }
+.squeala .big-wing { width: 20px; height: 35px; }
+.squeala .horn { position: absolute; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 10px solid gold; top: -10px; }
+.squeala .horn.left { left: 5px; } .squeala .horn.right { right: 5px; }
+.squeala .mist { position: absolute; bottom: -20px; left: -10px; width: 60px; height: 30px; border-radius: 50%; filter: blur(8px); opacity: 0.8; }
+
+/* New Genie Cat Design based on drawing */
+.genie-cat {
+    width: 160px;
+    height: 70px;
+    position: relative;
+}
+.genie-cat-body {
+    width: 70px;
+    height: 45px;
+    background: purple;
+    border: 2px solid black;
+    border-radius: 50%;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+}
+.genie-cat-head {
+    width: 55px;
+    height: 50px;
+    background: purple;
+    border: 2px solid black;
+    border-radius: 45% 55% 50% 50%;
+    position: absolute;
+    right: 0;
+    top: -5px;
+    z-index: 2;
+}
+.genie-cat-head .ear {
+    position: absolute;
+    width: 12px;
+    height: 20px;
+    background: purple;
+    border: 2px solid black;
+    border-radius: 50% 50% 0 0;
+    top: -10px;
+}
+.genie-cat-head .ear.left { left: 8px; }
+.genie-cat-head .ear.right { right: 8px; }
+.genie-cat-head .eye-container {
+    position: relative;
+    width: 100%;
+    top: 15px;
+    display: flex;
+    justify-content: space-around;
+    padding: 0 8px;
+    box-sizing: border-box;
+}
+.genie-cat-head .eye {
+    width: 12px;
+    height: 12px;
+    background: black;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.genie-cat-head .pupil {
+    width: 4px;
+    height: 4px;
+    background: white;
+    border-radius: 50%;
+}
+.genie-cat-head .mouth {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 10px;
+    border: 3px solid black;
+    border-color: transparent transparent black transparent;
+    border-radius: 50%;
+}
+.genie-cat-hand {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: purple;
+    border: 2px solid black;
+    border-radius: 50%;
+    z-index: 3;
+}
+.genie-cat-hand.left {
+    top: 35px;
+    right: 65px;
+}
+.genie-cat-hand.right {
+    top: 45px;
+    right: 45px;
+}
+.genie-cat-mist {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    width: 100px;
+    height: 30px;
+    background: linear-gradient(to left, transparent, deeppink, white, deeppink, transparent);
+    border-radius: 50%;
+    filter: blur(8px);
+    opacity: 0.9;
+    z-index: 0;
+}
+
+
+/* Genie Flyby Animation */
+@keyframes genie-fly { 0% { transform: translate(-100vw, 20%); } 100% { transform: translate(100vw, 20%); } }
+.genie-flyby-container {
+    position: absolute;
+    top: 30%;
+    left: 0;
+    width: 160px;
+    height: 70px;
+    z-index: 50;
+    pointer-events: none;
+    animation: genie-fly 2s ease-in-out forwards;
+}
+
+
+/* Game HUD - Health, Pets, & Mist */
+.game-hud { display: flex; justify-content: space-between; align-items: flex-end; padding: 0.25rem 0.5rem; gap: 0.5rem; }
+.health-bar-container { flex-grow: 1; }
+.health-bar-label { font-size: 0.6rem; margin-bottom: 4px; }
+.health-bar { width: 100%; height: 15px; background-color: var(--health-bar-bg); border: 2px solid #333; border-radius: 5px; }
+.health-bar-fill { height: 100%; background-color: var(--health-bar-color); border-radius: 2px; transition: width 0.3s ease; }
+.mist-bottle { position: relative; width: 50px; height: 70px; flex-shrink: 0; }
+.crystal-top { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 20px; height: 20px; background: #c26efc; border: 2px solid #333; clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
+.bottle-body { position: absolute; bottom: 0; width: 100%; height: 60px; background: var(--mist-bottle-color); border: 2px solid #333; border-radius: 10px 10px 20px 20px; overflow: hidden; }
+.bottle-body::before { content: ''; position: absolute; inset: 0; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 100 100'%3E%3Cpath d='M50 0 L65 20 L85 20 L90 40 L70 50 L90 60 L85 80 L65 80 L50 100 L35 80 L15 80 L10 60 L30 50 L10 40 L15 20 L35 20 Z' fill='none' stroke='%23ffffff33' stroke-width='5'/%3E%3C/svg%3E"); background-size: 20px 20px; opacity: 0.5; }
+.mist-liquid { position: absolute; bottom: 0; width: 100%; background: var(--mist-liquid-color); transition: height 0.5s ease-out; }
+.charge-count { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); color: white; font-size: 1.2rem; text-shadow: 2px 2px #000; z-index: 1;}
+@keyframes stardust-shimmer { 0% { background-position: 0 0; } 100% { background-position: 50px 50px; } }
+.stardust { position: absolute; inset: 0; background-image: radial-gradient(white 1px, transparent 1px); background-size: 10px 10px; opacity: 0.5; animation: stardust-shimmer 2s linear infinite; }
+.enchanted-genie-lamp { position: relative; width: 60px; height: 40px; }
+.lamp-base { position: absolute; bottom: 0; left: 5px; width: 50px; height: 8px; background: gold; border-radius: 50% 50% 0 0; }
+.lamp-body { position: absolute; bottom: 5px; left: 0; width: 60px; height: 25px; background: linear-gradient(to right, #e1a2f0, #8a2be2); border-radius: 50%; }
+.lamp-paw { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1rem; color: var(--mist-liquid-color); text-shadow: 0 0 2px white; }
+.lamp-spout { position: absolute; top: 5px; right: -5px; width: 25px; height: 10px; background: gold; border-radius: 0 50% 50% 0; }
+
+/* Mist Bottle Animation */
+@keyframes bottle-fly-to-target {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--target-x), var(--target-y)) scale(0.5); opacity: 0; }
+}
+.mist-bottle-flyby {
+  position: absolute;
+  bottom: 85px; right: 15px; width: 50px; height: 70px; z-index: 55;
+  pointer-events: none; animation: bottle-fly-to-target 1s ease-in forwards;
+}
+.mist-bottle-flyby .mist-bottle-visual { width: 100%; height: 100%; position: relative; }
+.mist-bottle-flyby .crystal-top { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 20px; height: 20px; background: #c26efc; border: 2px solid #333; clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
+.mist-bottle-flyby .bottle-body { position: absolute; bottom: 0; width: 100%; height: 60px; background: var(--mist-bottle-color); border: 2px solid #333; border-radius: 10px 10px 20px 20px; }
+
+/* Pet System */
+.pet {
+    position: absolute;
+    font-size: 2.5rem;
+    z-index: 5;
+    transition: left 2s linear, top 2s linear;
+    text-shadow: 0 0 5px white;
+}
+.pet-hud-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 120px;
+    flex-shrink: 0;
+}
+.pet-hud-icon { font-size: 1.5rem; }
+.pet-health { width: 100%; }
+
+/* Controls */
+.controls { display: flex; justify-content: space-between; align-items: flex-end; padding: 0.5rem; gap: 0.5rem; }
+.d-pad { display: grid; grid-template-areas: ". up ." "left . right" ". down ."; gap: 5px; width: 120px; }
+.d-pad .control-btn:nth-child(1) { grid-area: up; } .d-pad .control-btn:nth-child(2) { grid-area: left; }
+.d-pad .control-btn:nth-child(3) { grid-area: right; } .d-pad .control-btn:nth-child(4) { grid-area: down; }
+.control-btn {
+  width: 40px; height: 40px; border: none; border-radius: 50%; background-color: var(--primary-color);
+  color: white; font-size: 1.2rem; cursor: pointer; box-shadow: 0 4px #900;
+  display: flex; justify-content: center; align-items: center;
+}
+.control-btn:active { transform: translateY(2px); box-shadow: 0 2px #900; }
+.action-buttons { display: flex; flex-direction: column-reverse; align-items: center; gap: 0.5rem; }
+.control-btn.grab { background-color: #4caf50; font-size: 1rem; width: 70px; height: 70px; box-shadow: 0 5px #2a6a2c; }
+.control-btn.use-mist { background-color: #3498db; font-size: 0.6rem; width: 70px; height: 40px; border-radius: 10px; box-shadow: 0 4px #217dbb; }
+.control-btn.use-mist.active { background-color: #f1c40f; box-shadow: 0 4px #c8a20e; transform: scale(1.05); }
+.control-btn.call-genie { background: linear-gradient(45deg, #8a2be2, #fca311); font-size: 0.6rem; width: 70px; height: 40px; border-radius: 10px; box-shadow: 0 4px #6e22b5; }
+.control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Genie Refill Animation */
+@keyframes genie-summon { 0% { opacity: 0; transform: translate(-100vw, -50%) scale(0.5); } 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+@keyframes genie-depart { 0% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 100% { opacity: 0; transform: translate(100vw, -50%) scale(0.5); } }
+@keyframes bottle-fly-to-genie { 0% { transform: translate(-10vw, 30vh); } 100% { transform: translate(-50%, -50%) scale(1.2); } }
+@keyframes stardust-flow { 0% { height: 0; } 100% { height: 100%; } }
+
+.genie-refill-container { position: absolute; inset: 0; z-index: 60; pointer-events: none; }
+.genie-refill-container .genie-cat { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+.genie-refill-container .mist-bottle { position: absolute; top: 50%; left: 50%; transform: translate(-10vw, 30vh); }
+.genie-refill-container.summoning .genie-cat { animation: genie-summon 2s forwards; }
+.genie-refill-container.filling .genie-cat { transform: translate(-50%, -50%) scale(1); }
+.genie-refill-container.filling .mist-bottle { animation: bottle-fly-to-genie 2s forwards; }
+.genie-refill-container.filling .mist-liquid { animation: stardust-flow 2s 2s forwards; }
+.genie-refill-container.departing .genie-cat { animation: genie-depart 2s forwards; }
+.genie-refill-container.departing .mist-bottle { display: none; }
+
+/* Victory Animation */
+@keyframes genie-victory-lap {
+    0% { top: 10%; left: -20%; transform: rotate(0deg); }
+    25% { top: 60%; left: 50%; transform: rotate(20deg); }
+    50% { top: 10%; left: 120%; transform: rotate(0deg); }
+    75% { top: 60%; left: 50%; transform: rotate(-20deg); }
+    100% { top: 10%; left: -20%; transform: rotate(0deg); }
+}
+.victory-animation-container {
+    position: absolute;
+    top: 0; left: 0;
+    width: 160px;
+    height: 70px;
+    z-index: 5;
+    animation: genie-victory-lap 8s linear infinite;
+}
+
+
+/* Shop & Collection Index */
+.shop-container, .collection-container { padding: 1rem; flex-grow: 1; overflow-y: auto; position: relative; }
+.collection-container h2, .shop-container h2 { text-align: center; font-size: 1.2rem; margin-bottom: 1rem; }
+.pet-card { background-color: rgba(255,255,255,0.1); border: 2px solid var(--accent-color); border-radius: 10px; padding: 1rem; margin-bottom: 1rem; display: flex; align-items: center; }
+.pet-icon { font-size: 2.5rem; margin-right: 1rem; }
+.pet-info h3 { margin: 0 0 0.5rem; } .pet-info p { margin: 0; font-size: 0.8rem; }
+.pet-buy-btn { margin-left: auto; font-family: var(--font-family); background-color: #4caf50; color: var(--text-color); border: 2px solid var(--text-color); border-radius: 8px; padding: 0.5rem 1rem; cursor: pointer; }
+.pet-buy-btn:disabled { background-color: #555; cursor: not-allowed; }
+.pet-buy-btn.deploy { background-color: #3498db; }
+.pet-buy-btn.active { background-color: #f1c40f; color: #333; }
+.no-pets-message { text-align: center; padding: 2rem 0; font-size: 0.9rem; color: rgba(255,255,255,0.7); }
+.collection-subtitle { font-size: 1rem; color: var(--accent-color); text-align: center; border-bottom: 2px solid var(--accent-color); padding-bottom: 0.5rem; margin: 1.5rem 0 1rem 0; }
+.squeala-collection-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 1rem; }
+.squeala-collection-item { display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: rgba(0,0,0,0.2); border-radius: 8px; padding: 0.5rem; text-align: center; }
+.squeala-collection-item .squeala-display { width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; margin-bottom: 0.5rem; position: relative; }
+.squeala-collection-item .squeala-display .squeala { position: relative !important; left: auto !important; top: auto !important; transform: scale(1.2); }
+.squeala-placeholder { width: 60px; height: 60px; background-color: #333; border: 2px dashed #555; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #777; margin-bottom: 0.5rem; }
+.squeala-rarity-name { font-size: 0.7rem; font-weight: bold; min-height: 2.2rem; display: flex; align-items: center; }
+.squeala-collection-item:not(.collected) .squeala-rarity-name { color: #777; }
+
+/* Squeala Viewer */
+.squeala-viewer-container { padding: 1rem; flex-grow: 1; overflow-y: auto; text-align: center; }
+.squeala-viewer-container h2 { font-size: 1.2rem; margin-bottom: 1rem; }
+.squeala-viewer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 1rem;
+}
+.squeala-viewer-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: rgba(0,0,0,0.3);
+    border: 2px solid var(--accent-color);
+    border-radius: 8px;
+    padding: 1rem 0.5rem;
+}
+.squeala-viewer-item .squeala-display {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+    position: relative;
+}
+.squeala-viewer-item .squeala-display .squeala {
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    transform: scale(1.5);
+}
+.squeala-viewer-item .squeala-info {
+    text-align: center;
+}
+.squeala-viewer-item .squeala-rarity-name {
+    font-size: 0.7rem;
+    font-weight: bold;
+    display: block;
+}
+.squeala-viewer-item .squeala-points {
+    font-size: 0.6rem;
+    color: var(--accent-color);
+    display: block;
+}
